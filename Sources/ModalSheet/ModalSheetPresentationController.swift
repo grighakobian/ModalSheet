@@ -30,8 +30,8 @@ public class ModalSheetPresentationController: UIPresentationController {
         case setDetent(Detent)
     }
     
-    let dimmingView: DimmingView
-    let grabberView: GrabberView
+    let dimmingView: UIView
+    let grabberView: UIView
     let touchForwardingView: TouchForwardingView
     let panGestureRecognizer: UIPanGestureRecognizer
     let tapGestureRecognizer: UITapGestureRecognizer
@@ -71,8 +71,8 @@ public class ModalSheetPresentationController: UIPresentationController {
     }
             
     override public init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
-        self.dimmingView = DimmingView()
-        self.grabberView = GrabberView()
+        self.dimmingView = UIView()
+        self.grabberView = UIView()
         self.touchForwardingView = TouchForwardingView()
         self.panGestureRecognizer = UIPanGestureRecognizer()
         self.tapGestureRecognizer = UITapGestureRecognizer()
@@ -115,6 +115,8 @@ public class ModalSheetPresentationController: UIPresentationController {
     }
     
     private func addGrabberView(to presentedView: UIView) {
+        grabberView.backgroundColor = UIColor.grabberBackground
+        grabberView.layer.cornerRadius = 2.5
         grabberView.translatesAutoresizingMaskIntoConstraints = false
         presentedView.addSubview(grabberView)
         grabberView.topAnchor.constraint(equalTo: presentedView.topAnchor, constant: 5.0).isActive = true
@@ -125,6 +127,7 @@ public class ModalSheetPresentationController: UIPresentationController {
     }
     
     private func addDimmingView(to containerView: UIView) {
+        dimmingView.backgroundColor = UIColor.dimmBackground
         dimmingView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(dimmingView)
         dimmingView.isUserInteractionEnabled = (largestUndimmedDetent == .none)

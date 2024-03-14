@@ -1,11 +1,10 @@
 import UIKit
 
-extension UIViewController {
+public extension UIViewController {
+
     func presentModalSheet(_ viewControllerToPresent: ModalSheetTransitioning, animated: Bool, completion: (()->Void)? = nil) {
         viewControllerToPresent.modalPresentationStyle = .custom
-        viewControllerToPresent.modalPresentationCapturesStatusBarAppearance = true
-        let transitioningDelegate = ModalSheetTransition.shared
-        viewControllerToPresent.transitioningDelegate = transitioningDelegate
+        viewControllerToPresent.transitioningDelegate = ModalSheetTransition.shared
         present(viewControllerToPresent, animated: animated, completion: completion)
     }
 }
