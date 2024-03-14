@@ -76,7 +76,7 @@ final class ModalSheetExampleController: UITableViewController {
     private func updateTransitionOptions() {
         modalSheetViewController.setPrefersGrabberVisible(prefersGrabberVisibleSwitch.isOn)
         
-        var detents: [ModalSheetPresentationController.Detent] = []
+        var detents: [Detent] = []
         if detentMediumSwitch.isOn {
             detents.append(.medium)
         }

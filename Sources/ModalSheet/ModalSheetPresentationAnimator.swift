@@ -1,8 +1,6 @@
 import UIKit
 
 public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    public typealias Detent = ModalSheetPresentationController.Detent
-    
     public let detents: [Detent]
     public let selectedDetent: Detent?
     public let animator: UIViewPropertyAnimator
@@ -34,7 +32,7 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
         var initialFrame = transitionContext.initialFrame(for: fromViewController)
         let finalFrame = transitionContext.finalFrame(for: toViewController)
         
-        var detent: ModalSheetPresentationController.Detent = .large
+        var detent: Detent = .large
         if let selectedDetent = self.selectedDetent, detents.contains(selectedDetent) {
             detent = selectedDetent
         } else if detents.contains(.medium) {

@@ -6,15 +6,15 @@ import UIKit
     @objc optional func sheetPresentationControllerDidChangeSelectedDetent(_ sheetPresentationController: ModalSheetPresentationController)
 }
 
+/// An object that represents a height where a sheet naturally rests.
+public enum Detent: Int, Hashable {
+    /// The system's medium detent.
+    case medium
+    /// The system's large detent.
+    case large
+}
+
 public class ModalSheetPresentationController: UIPresentationController {
-    /// An object that represents a height where a sheet naturally rests.
-    public enum Detent: Int, Hashable {
-        /// The system's medium detent.
-        case medium
-        /// The system's large detent.
-        case large
-    }
-    
     /// An object that represent animation props.
     struct Animation {
         /// The dimming view alpha.
@@ -51,17 +51,17 @@ public class ModalSheetPresentationController: UIPresentationController {
     /// This array must have at least one element.
     /// Detents must be specified in order from smallest to largest height.
     /// Default: an array of only [UISheetPresentationControllerDetent largeDetent]
-    public var detents: [ModalSheetPresentationController.Detent] = [.large]
+    public var detents: [Detent] = [.large]
 
     /// The identifier of the selected detent. When nil or the identifier is not found in detents, the sheet is displayed at the smallest detent.
     /// Default: nil
-    public var selectedDetent: ModalSheetPresentationController.Detent?
+    public var selectedDetent: Detent?
 
     /// The identifier of the largest detent that is not dimmed. When nil or the identifier is not found in detents, all detents are dimmed.
     /// Default: nil
-    public var largestUndimmedDetent: ModalSheetPresentationController.Detent?
+    public var largestUndimmedDetent: Detent?
 
-    public func setSelectedDetent(_ selectedDetent: ModalSheetPresentationController.Detent, animated: Bool) {
+    public func setSelectedDetent(_ selectedDetent: Detent, animated: Bool) {
         guard detents.contains(selectedDetent),
               let containerView = containerView,
               self.selectedDetent != selectedDetent else { return }
@@ -94,7 +94,7 @@ public class ModalSheetPresentationController: UIPresentationController {
         addTapGestureRecognizer(to: containerView)
     }
     
-    public func preferredContentSize(for detent: ModalSheetPresentationController.Detent) -> CGSize {
+    public func preferredContentSize(for detent: Detent) -> CGSize {
         guard let containerView = containerView else { return .zero }
         let safeAreaInsets = containerView.safeAreaInsets
         let topOffsetAddition: CGFloat = 10.0

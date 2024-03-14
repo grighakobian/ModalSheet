@@ -4,9 +4,9 @@ import ModalSheet
 final class ModalSheetViewController: UIViewController {
     private var _preferredCornerRadius: CGFloat? = nil
     private var _prefersGrabberVisible: Bool = false
-    private var _detents: [ModalSheetPresentationController.Detent] = [.large]
-    private var _selectedDetent: ModalSheetPresentationController.Detent? = nil
-    private var _largestUndimmedDetent: ModalSheetPresentationController.Detent? = nil
+    private var _detents: [Detent] = [.large]
+    private var _selectedDetent: Detent? = nil
+    private var _largestUndimmedDetent: Detent? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,15 +24,15 @@ final class ModalSheetViewController: UIViewController {
         self._prefersGrabberVisible = prefersGrabberVisible
     }
 
-    func setDetents(_ detents: [ModalSheetPresentationController.Detent]) {
+    func setDetents(_ detents: [Detent]) {
         self._detents = detents
     }
     
-    func setSelectedDetent(_ selectedDetent: ModalSheetPresentationController.Detent?) {
+    func setSelectedDetent(_ selectedDetent: Detent?) {
         self._selectedDetent = selectedDetent
     }
     
-    func setLargestUndimmedDetent(_ largestUndimmedDetent: ModalSheetPresentationController.Detent?) {
+    func setLargestUndimmedDetent(_ largestUndimmedDetent: Detent?) {
         self._largestUndimmedDetent = largestUndimmedDetent
     }
 }
@@ -75,15 +75,15 @@ extension ModalSheetViewController: ModalSheetTransitioning {
         return _prefersGrabberVisible
     }
 
-    var detents: [ModalSheetPresentationController.Detent] {
+    var detents: [Detent] {
         return _detents
     }
     
-    var selectedDetent: ModalSheetPresentationController.Detent? {
+    var selectedDetent: Detent? {
         return _selectedDetent
     }
 
-    var largestUndimmedDetent: ModalSheetPresentationController.Detent? {
+    var largestUndimmedDetent: Detent? {
         return _largestUndimmedDetent
     }
 }

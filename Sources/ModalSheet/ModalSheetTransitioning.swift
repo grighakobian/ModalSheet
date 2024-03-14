@@ -17,15 +17,15 @@ public protocol ModalSheetTransitioning: UIViewController {
     /// This array must have at least one element.
     /// Detents must be specified in order from smallest to largest height.
     /// Default: an array of only [UISheetPresentationControllerDetent largeDetent]
-    var detents: [ModalSheetPresentationController.Detent] { get }
+    var detents: [Detent] { get }
         
     /// The identifier of the selected detent. When nil or the identifier is not found in detents, the sheet is displayed at the smallest detent.
     /// Default: nil
-    var selectedDetent: ModalSheetPresentationController.Detent? { get }
+    var selectedDetent: Detent? { get }
 
     /// The identifier of the largest detent that is not dimmed. When nil or the identifier is not found in detents, all detents are dimmed.
     /// Default: nil
-    var largestUndimmedDetent: ModalSheetPresentationController.Detent? { get }
+    var largestUndimmedDetent: Detent? { get }
 }
 
 
@@ -45,15 +45,15 @@ extension ModalSheetTransitioning {
         return false
     }
 
-    var detents: [ModalSheetPresentationController.Detent] {
+    var detents: [Detent] {
         return [.large]
     }
     
-    var selectedDetent: ModalSheetPresentationController.Detent? {
+    var selectedDetent: Detent? {
         return nil
     }
 
-    var largestUndimmedDetent: ModalSheetPresentationController.Detent? {
+    var largestUndimmedDetent: Detent? {
         return nil
     }
 }
