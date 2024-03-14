@@ -1,10 +1,3 @@
-//
-//  ModalSheetTransitioning.swift
-//  ModalSheetTransition
-//
-//  Created by Grigor Hakobyan on 18.02.22.
-//
-
 import UIKit
 
 public protocol ModalSheetTransitioning: UIViewController {
