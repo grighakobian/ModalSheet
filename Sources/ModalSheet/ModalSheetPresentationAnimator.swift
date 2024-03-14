@@ -26,48 +26,52 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
             return
         }
 
-        let containerView = transitionContext.containerView
-        var initialFrame = transitionContext.initialFrame(for: fromViewController)
-        let finalFrame = transitionContext.finalFrame(for: toViewController)
-        
-        var detent: Detent = .large
-        if let selectedDetent = self.selectedDetent, detents.contains(selectedDetent) {
-            detent = selectedDetent
-        } else if detents.contains(.medium) {
-            detent = .medium
-        }
-        
-        presentationView.frame = finalFrame
-        presentationView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
-        let dropShadowView = DropShadowView()
-        dropShadowView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        dropShadowView.frame = finalFrame
-        
-        let contentView = UIView()
-        containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        contentView.frame = finalFrame
-        contentView.addSubview(presentationView)
+        let detent: Detent = {
+            if let selectedDetent, detents.contains(selectedDetent) {
+                return selectedDetent
+            } else if detents.contains(.medium) {
+                return .medium
+            } else {
+                return .large
+            }
+        }()
+        let preferredContentSize = presentationController.preferredContentSize(for: detent)
 
+        let containerView = transitionContext.containerView
+        let dropShadowView = DropShadowView()
+
+        let contentView = UIView()
         contentView.clipsToBounds = true
         contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         contentView.layer.cornerRadius = presentationController.preferredCornerRadius ?? 8.0
+
+        presentationView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(presentationView)
+        presentationView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        presentationView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
+        presentationView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        presentationView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+
+        contentView.translatesAutoresizingMaskIntoConstraints = false
         dropShadowView.addSubview(contentView)
-        
-        let preferredContentSize = presentationController.preferredContentSize(for: detent)
-        initialFrame.size.width = preferredContentSize.width
-        dropShadowView.transform = CGAffineTransform(translationX: 0, y: initialFrame.height)
- 
+        contentView.topAnchor.constraint(equalTo: dropShadowView.topAnchor).isActive = true
+        contentView.leadingAnchor.constraint(equalTo: dropShadowView.leadingAnchor).isActive = true
+        contentView.trailingAnchor.constraint(equalTo: dropShadowView.trailingAnchor).isActive = true
+        contentView.bottomAnchor.constraint(equalTo: dropShadowView.bottomAnchor).isActive = true
+
+        dropShadowView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(dropShadowView)
-        dropShadowView.center = containerView.center
+        dropShadowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
+        dropShadowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
+        dropShadowView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
+        dropShadowView.heightAnchor.constraint(equalToConstant: preferredContentSize.height).isActive = true
+
+        dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)
         presentationController.dimmingView.alpha = 0.0
 
-        let animationProgress = (detent == .medium) ? 0.5 : 1.0
-        let animation = presentationController.animation(for: animationProgress, in: containerView)
-        
         animator.addAnimations {
-            dropShadowView.transform = animation.transform
-            presentationController.dimmingView.alpha = animation.alpha
+            dropShadowView.transform = CGAffineTransform.identity
+            presentationController.dimmingView.alpha = 1.0
         }
         
         animator.addCompletion { position in

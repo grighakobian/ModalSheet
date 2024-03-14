@@ -1,17 +1,17 @@
 import UIKit
 
-@objc public protocol ModalSheetPresentationControllerDelegate: UIAdaptivePresentationControllerDelegate {
-    // Called when the selected detent of the sheet changes in response to user interaction.
-    // Not called if selectedDetentIdentifier is programmatically set.
-    @objc optional func sheetPresentationControllerDidChangeSelectedDetent(_ sheetPresentationController: ModalSheetPresentationController)
-}
-
 /// An object that represents a height where a sheet naturally rests.
-public enum Detent: Int, Hashable {
+public enum Detent: Hashable {
     /// The system's medium detent.
     case medium
     /// The system's large detent.
     case large
+}
+
+@objc public protocol ModalSheetPresentationControllerDelegate: UIAdaptivePresentationControllerDelegate {
+    // Called when the selected detent of the sheet changes in response to user interaction.
+    // Not called if selectedDetentIdentifier is programmatically set.
+    @objc optional func sheetPresentationControllerDidChangeSelectedDetent(_ sheetPresentationController: ModalSheetPresentationController)
 }
 
 public class ModalSheetPresentationController: UIPresentationController {
@@ -93,21 +93,30 @@ public class ModalSheetPresentationController: UIPresentationController {
         addPanGestureRecognizer(to: containerView)
         addTapGestureRecognizer(to: containerView)
     }
-    
-    public func preferredContentSize(for detent: Detent) -> CGSize {
+
+//    func initialDetentForPresenting() -> Detent {
+//        if let selectedDetent, detents.contains(selectedDetent) {
+//            return selectedDetent
+//        } else if detents.contains(.medium) {
+//            return .medium
+//        } else {
+//            return .large
+//        }
+//    }
+
+    func preferredContentSize(for detent: Detent) -> CGSize {
         guard let containerView = containerView else { return .zero }
         let safeAreaInsets = containerView.safeAreaInsets
-        let topOffsetAddition: CGFloat = 10.0
         switch detent {
         case .medium:
             var contentSize = containerView.bounds.size
-            let verticalSpacing = safeAreaInsets.top + safeAreaInsets.bottom
-            var contentHeight = contentSize.height
-            contentHeight = (contentHeight - (verticalSpacing + topOffsetAddition)) / 2 + verticalSpacing
-            contentSize.height = contentHeight
+            contentSize.height /= 2
+            contentSize.height += safeAreaInsets.bottom
             return contentSize
         case .large:
+            let topOffsetAddition: CGFloat = 10.0
             var contentSize = containerView.bounds.size
+
             contentSize.height -= (safeAreaInsets.top + topOffsetAddition)
             return contentSize
         }
