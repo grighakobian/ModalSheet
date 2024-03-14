@@ -20,14 +20,12 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
     public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let fromViewController = transitionContext.viewController(forKey: .from),
               let toViewController = transitionContext.viewController(forKey: .to),
-              let presentationController = toViewController.presentationController as? ModalSheetPresentationController,
-              let presentationView = transitionContext.view(forKey: .to) else {
-                  transitionContext.completeTransition(false)
+              let presentationView = transitionContext.view(forKey: .to),
+              let presentationController = toViewController.presentationController as? ModalSheetPresentationController else {
+            transitionContext.completeTransition(false)
             return
         }
-        
-        fromViewController.beginAppearanceTransition(false, animated: true)
-        
+
         let containerView = transitionContext.containerView
         var initialFrame = transitionContext.initialFrame(for: fromViewController)
         let finalFrame = transitionContext.finalFrame(for: toViewController)
@@ -73,11 +71,18 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
         }
         
         animator.addCompletion { position in
-            if position == UIViewAnimatingPosition.end {
+            switch position {
+            case .start:
+                fromViewController.beginAppearanceTransition(false, animated: true)
+            case .current:
+                break
+            case .end:
                 presentationController.selectedDetent = detent
                 fromViewController.endAppearanceTransition()
                 let didComplete = !transitionContext.transitionWasCancelled
                 transitionContext.completeTransition(didComplete)
+            @unknown default:
+                break
             }
         }
         
