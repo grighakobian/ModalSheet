@@ -3,27 +3,31 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD4AF1712BA32A1B002D18F4 /* ModalSheet in Frameworks */ = {isa = PBXBuildFile; productRef = DD4AF1702BA32A1B002D18F4 /* ModalSheet */; };
 		DDFD1C562BA3256900550FF6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD1C552BA3256900550FF6 /* AppDelegate.swift */; };
 		DDFD1C582BA3256900550FF6 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD1C572BA3256900550FF6 /* SceneDelegate.swift */; };
-		DDFD1C5A2BA3256900550FF6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD1C592BA3256900550FF6 /* ViewController.swift */; };
 		DDFD1C5D2BA3256900550FF6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DDFD1C5B2BA3256900550FF6 /* Main.storyboard */; };
 		DDFD1C5F2BA3256B00550FF6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDFD1C5E2BA3256B00550FF6 /* Assets.xcassets */; };
 		DDFD1C622BA3256B00550FF6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DDFD1C602BA3256B00550FF6 /* LaunchScreen.storyboard */; };
+		DDFD1C6C2BA328C200550FF6 /* ModalSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD1C692BA328C200550FF6 /* ModalSheetViewController.swift */; };
+		DDFD1C6D2BA328C200550FF6 /* ModalSheetExampleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFD1C6A2BA328C200550FF6 /* ModalSheetExampleController.swift */; };
+		DDFD1C712BA3294C00550FF6 /* ModalSheet in Frameworks */ = {isa = PBXBuildFile; productRef = DDFD1C702BA3294C00550FF6 /* ModalSheet */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		DDFD1C522BA3256900550FF6 /* ModalSheetExamples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ModalSheetExamples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDFD1C552BA3256900550FF6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DDFD1C572BA3256900550FF6 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		DDFD1C592BA3256900550FF6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		DDFD1C5C2BA3256900550FF6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DDFD1C5E2BA3256B00550FF6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDFD1C612BA3256B00550FF6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DDFD1C632BA3256B00550FF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DDFD1C692BA328C200550FF6 /* ModalSheetViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModalSheetViewController.swift; sourceTree = "<group>"; };
+		DDFD1C6A2BA328C200550FF6 /* ModalSheetExampleController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModalSheetExampleController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD4AF1712BA32A1B002D18F4 /* ModalSheet in Frameworks */,
+				DDFD1C712BA3294C00550FF6 /* ModalSheet in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,10 +64,11 @@
 			children = (
 				DDFD1C552BA3256900550FF6 /* AppDelegate.swift */,
 				DDFD1C572BA3256900550FF6 /* SceneDelegate.swift */,
-				DDFD1C592BA3256900550FF6 /* ViewController.swift */,
+				DDFD1C6A2BA328C200550FF6 /* ModalSheetExampleController.swift */,
+				DDFD1C692BA328C200550FF6 /* ModalSheetViewController.swift */,
 				DDFD1C5B2BA3256900550FF6 /* Main.storyboard */,
-				DDFD1C5E2BA3256B00550FF6 /* Assets.xcassets */,
 				DDFD1C602BA3256B00550FF6 /* LaunchScreen.storyboard */,
+				DDFD1C5E2BA3256B00550FF6 /* Assets.xcassets */,
 				DDFD1C632BA3256B00550FF6 /* Info.plist */,
 			);
 			path = ModalSheetExamples;
@@ -83,6 +90,10 @@
 			dependencies = (
 			);
 			name = ModalSheetExamples;
+			packageProductDependencies = (
+				DDFD1C702BA3294C00550FF6 /* ModalSheet */,
+				DD4AF1702BA32A1B002D18F4 /* ModalSheet */,
+			);
 			productName = ModalSheetExamples;
 			productReference = DDFD1C522BA3256900550FF6 /* ModalSheetExamples.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +122,9 @@
 				Base,
 			);
 			mainGroup = DDFD1C492BA3256800550FF6;
+			packageReferences = (
+				DD4AF16F2BA32A1B002D18F4 /* XCLocalSwiftPackageReference ".." */,
+			);
 			productRefGroup = DDFD1C532BA3256900550FF6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -138,8 +152,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DDFD1C5A2BA3256900550FF6 /* ViewController.swift in Sources */,
+				DDFD1C6D2BA328C200550FF6 /* ModalSheetExampleController.swift in Sources */,
 				DDFD1C562BA3256900550FF6 /* AppDelegate.swift in Sources */,
+				DDFD1C6C2BA328C200550FF6 /* ModalSheetViewController.swift in Sources */,
 				DDFD1C582BA3256900550FF6 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -218,7 +233,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -275,7 +290,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -363,6 +378,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DD4AF16F2BA32A1B002D18F4 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DD4AF1702BA32A1B002D18F4 /* ModalSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ModalSheet;
+		};
+		DDFD1C702BA3294C00550FF6 /* ModalSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ModalSheet;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DDFD1C4A2BA3256800550FF6 /* Project object */;
 }
