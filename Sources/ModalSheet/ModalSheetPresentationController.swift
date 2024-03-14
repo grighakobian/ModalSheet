@@ -86,7 +86,6 @@ public class ModalSheetPresentationController: UIPresentationController {
               let presentedView = presentedView else { return }
         
         configureContainerView(containerView)
-        configurePresentedView(presentedView)
 
         addDimmingView(to: containerView)
         addGrabberView(to: presentedView)
@@ -135,13 +134,6 @@ public class ModalSheetPresentationController: UIPresentationController {
         dimmingView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
         dimmingView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
         dimmingView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-    }
-    
-    private func configurePresentedView(_ presentedView: UIView) {
-        let preferredCornerRadius = preferredCornerRadius ?? 8.0
-        presentedView.layer.cornerRadius = preferredCornerRadius
-        presentedView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        presentedView.clipsToBounds = true
     }
     
     private func configureContainerView(_ containerView: UIView) {

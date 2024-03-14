@@ -50,10 +50,12 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
         
         let contentView = UIView()
         containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        contentView.clipsToBounds = true
         contentView.frame = finalFrame
         contentView.addSubview(presentationView)
-        
+
+        contentView.clipsToBounds = true
+        contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        contentView.layer.cornerRadius = presentationController.preferredCornerRadius ?? 8.0
         dropShadowView.addSubview(contentView)
         
         let preferredContentSize = presentationController.preferredContentSize(for: detent)
