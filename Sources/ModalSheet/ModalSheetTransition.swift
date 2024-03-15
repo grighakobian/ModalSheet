@@ -1,6 +1,6 @@
 import UIKit
 
-final class ModalSheetTransition: NSObject, UIViewControllerTransitioningDelegate {
+@MainActor final class ModalSheetTransition: NSObject, UIViewControllerTransitioningDelegate {
 
     static let shared = ModalSheetTransition()
         

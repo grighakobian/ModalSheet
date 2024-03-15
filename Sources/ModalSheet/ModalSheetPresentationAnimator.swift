@@ -1,6 +1,6 @@
 import UIKit
 
-final class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+@MainActor final class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     private let animator: UIViewPropertyAnimator
 
     override init() {

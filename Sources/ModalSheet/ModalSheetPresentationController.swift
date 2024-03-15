@@ -10,13 +10,13 @@ public enum Detent: Hashable {
     case constant(height: CGFloat)
 }
 
-@objc public protocol ModalSheetPresentationControllerDelegate: UIAdaptivePresentationControllerDelegate {
+@MainActor @objc public protocol ModalSheetPresentationControllerDelegate: UIAdaptivePresentationControllerDelegate {
     // Called when the selected detent of the sheet changes in response to user interaction.
     // Not called if selectedDetentIdentifier is programmatically set.
     @objc optional func sheetPresentationControllerDidChangeSelectedDetent(_ sheetPresentationController: ModalSheetPresentationController)
 }
 
-public class ModalSheetPresentationController: UIPresentationController {
+@MainActor open class ModalSheetPresentationController: UIPresentationController {
 
     /// An object that represent animation props.
     struct Animation {

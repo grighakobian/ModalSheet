@@ -1,6 +1,6 @@
 import UIKit
 
-public protocol ModalSheetTransitioning: UIViewController {
+@MainActor public protocol ModalSheetTransitioning: UIViewController {
     /// The delegate object for managing adaptive presentations.
     var delegate: ModalSheetPresentationControllerDelegate? { get }
 
