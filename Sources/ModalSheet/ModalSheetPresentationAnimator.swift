@@ -3,12 +3,14 @@ import UIKit
 public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     public let detents: [Detent]
     public let selectedDetent: Detent?
+    public let largestUndimmedDetent: Detent?
     public let animator: UIViewPropertyAnimator
     
-    public init(detents: [Detent], selectedDetent: Detent?) {
+    public init(detents: [Detent], selectedDetent: Detent?, largestUndimmedDetent: Detent?) {
         self.detents = detents
         self.selectedDetent = selectedDetent
-        let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.3)
+        self.largestUndimmedDetent = largestUndimmedDetent
+        let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.4)
         self.animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: springTimingParameters)
         super.init()
     }
@@ -66,12 +68,14 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
         dropShadowView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
         dropShadowView.heightAnchor.constraint(equalToConstant: preferredContentSize.height).isActive = true
 
-        dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)
         presentationController.dimmingView.alpha = 0.0
+        dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)
 
-        animator.addAnimations {
+        animator.addAnimations { [largestUndimmedDetent] in
+            if detent != largestUndimmedDetent {
+                presentationController.dimmingView.alpha = 1.0
+            }
             dropShadowView.transform = CGAffineTransform.identity
-            presentationController.dimmingView.alpha = 1.0
         }
         
         animator.addCompletion { position in

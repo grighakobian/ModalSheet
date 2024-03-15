@@ -8,7 +8,10 @@ public class ModalSheetTransition: NSObject, UIViewControllerTransitioningDelega
         guard let presented = presented as? ModalSheetTransitioning else {
             return nil
         }
-        return ModalSheetPresentationAnimator(detents: presented.detents, selectedDetent: presented.selectedDetent)
+        return ModalSheetPresentationAnimator(
+            detents: presented.detents,
+            selectedDetent: presented.selectedDetent,
+            largestUndimmedDetent: presented.largestUndimmedDetent)
     }
     
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {

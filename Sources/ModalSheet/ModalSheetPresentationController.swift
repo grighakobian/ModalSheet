@@ -6,6 +6,8 @@ public enum Detent: Hashable {
     case medium
     /// The system's large detent.
     case large
+
+    case constant(height: CGFloat)
 }
 
 @objc public protocol ModalSheetPresentationControllerDelegate: UIAdaptivePresentationControllerDelegate {
@@ -29,13 +31,21 @@ public class ModalSheetPresentationController: UIPresentationController {
         case attemptToDismiss
         case setDetent(Detent)
     }
-    
+
+    enum AnimationType {
+        case dismiss
+        case attemptToDismiss
+        case setDetent(Detent)
+    }
+
     let dimmingView: UIView
     let grabberView: UIView
     let touchForwardingView: TouchForwardingView
     let panGestureRecognizer: UIPanGestureRecognizer
     let tapGestureRecognizer: UITapGestureRecognizer
-   
+
+    private var _presentedViewHeight: NSLayoutConstraint?
+
     /// The preferred corner radius of the sheet when presented.
     /// This value is only respected when the sheet is at the front of its stack.
     /// Default: nil
@@ -81,10 +91,9 @@ public class ModalSheetPresentationController: UIPresentationController {
     
     override public func presentationTransitionWillBegin() {
         super.presentationTransitionWillBegin()
-        
-        guard let containerView = containerView,
-              let presentedView = presentedView else { return }
-        
+        guard let containerView, let presentedView else {
+            return
+        }
         configureContainerView(containerView)
 
         addDimmingView(to: containerView)
@@ -92,6 +101,17 @@ public class ModalSheetPresentationController: UIPresentationController {
         
         addPanGestureRecognizer(to: containerView)
         addTapGestureRecognizer(to: containerView)
+    }
+
+    public override func presentationTransitionDidEnd(_ completed: Bool) {
+        super.presentationTransitionDidEnd(completed)
+
+        for constraint in presentedView?.parentDropShadowView?.constraints ?? [] {
+            if constraint.firstAttribute == .height && constraint.secondAttribute == .notAnAttribute {
+                _presentedViewHeight = constraint
+                break
+            }
+        }
     }
 
 //    func initialDetentForPresenting() -> Detent {
@@ -116,9 +136,11 @@ public class ModalSheetPresentationController: UIPresentationController {
         case .large:
             let topOffsetAddition: CGFloat = 10.0
             var contentSize = containerView.bounds.size
-
             contentSize.height -= (safeAreaInsets.top + topOffsetAddition)
             return contentSize
+
+        case .constant(let height):
+            return CGSize(width: containerView.bounds.width, height: height)
         }
     }
     
@@ -181,38 +203,77 @@ public class ModalSheetPresentationController: UIPresentationController {
     
     @objc private func panned(_ recognizer: UIPanGestureRecognizer) {
         guard let containerView = containerView,
-              let presentedView = presentedView?.parentDropShadowView else { return }
-        
-        defer { recognizer.setTranslation(.zero, in: containerView) }
-        
+              let presentedView = presentedView?.parentDropShadowView,
+              let _presentedViewHeight else { return }
+
+        defer {
+            recognizer.setTranslation(.zero, in: containerView)
+        }
+
         switch recognizer.state {
         case .changed:
-            let initialTransform = presentedView.transform
             let translation = recognizer.translation(in: containerView)
-            var transform = initialTransform.translatedBy(x: 0, y: translation.y)
-            let safeAreaInsets = containerView.safeAreaInsets
-            transform.ty = max(transform.ty, safeAreaInsets.top)
-            let animationProgress = animationProgress(for: transform, in: containerView)
-            let animation = animation(for: animationProgress, in: containerView, and: 0.0)
-            apply(animation: animation)
+            let maxHeight = containerView.bounds.height - containerView.safeAreaInsets.top
+            let height = _presentedViewHeight.constant - translation.y
+            _presentedViewHeight.constant = min(height, maxHeight)
+            presentedView.layoutIfNeeded()
+            print("translation: \(translation)")
         case .ended, .cancelled:
             let velocity = recognizer.velocity(in: containerView)
-            let progress = animationProgress(for: presentedView.transform, in: containerView)
-            let actionItemAtEnd = actionItemAtEnd(for: progress, and: velocity, in: containerView)
-            if case .dismiss = actionItemAtEnd {
-                if delegate?.presentationControllerShouldDismiss?(self) == true {
-                    delegate?.presentationControllerWillDismiss?(self)
-                }
-            } else if case .attemptToDismiss = actionItemAtEnd {
-                delegate?.presentationControllerDidAttemptToDismiss?(self)
-            }
-            let animator = animator(for: actionItemAtEnd, in: containerView)
+            print("Velocity: \(velocity)")
+            let animationType = animationType(for: _presentedViewHeight.constant, velocity: velocity)
+            print(animationType)
+            let animator = animator(for: animationType, in: containerView)
             animator.startAnimation()
         default:
             break
         }
     }
-    
+
+    func animationType(for presentedViewHeight: CGFloat, velocity: CGPoint)-> AnimationType {
+        let sortedDetents = detents.sorted { (detent1, detent2) -> Bool in
+            let detent1Height = preferredContentSize(for: detent1).height
+            let detent2Height = preferredContentSize(for: detent2).height
+            return detent1Height < detent2Height
+        }
+
+        let requiredMinVelocity = containerView!.bounds.height / 2.0
+
+        if abs(velocity.y) < requiredMinVelocity {
+            print("Velocity is small")
+            return .setDetent(selectedDetent ?? sortedDetents.first ?? .large)
+        }
+
+        for (index, detent) in sortedDetents.enumerated() {
+            let detentHeight = preferredContentSize(for: detent).height
+            if velocity.y > 0 {
+                if detentHeight <= presentedViewHeight {
+                    return .setDetent(detent)
+                } else if index == 0 {
+//                    if presentedViewController.isModalInPresentation {
+//                        return .attemptToDismiss
+//                    } else {
+                        return .dismiss
+//                    }
+                }
+            } else {
+                // moving up
+                if detentHeight >= presentedViewHeight {
+                    return .setDetent(detent)
+                } else if index == sortedDetents.count - 1 {
+                    return .setDetent(sortedDetents[sortedDetents.count - 1])
+                }
+            }
+        }
+
+        return .attemptToDismiss
+    }
+
+    func presentedViewHeight(_ initialHeight: CGFloat, in containerView: UIView, with translation: CGPoint) -> CGFloat {
+        let maxHeight = containerView.bounds.height - containerView.safeAreaInsets.top
+        return min(initialHeight - translation.y, maxHeight)
+    }
+
     /// Apply the animation.
     /// - Parameter animation: An Animation object that represents animation props.
     func apply(animation: Animation) {
@@ -254,54 +315,47 @@ public class ModalSheetPresentationController: UIPresentationController {
         return Animation(alpha: dimmingViewAlpha, transform: presentedViewTransform)
     }
     
-    func animator(for actionItemAtEnd: ActionItemAtEnd, in containerView: UIView) -> UIViewPropertyAnimator {
-        let timingParameters = UISpringTimingParameters(damping: 0.9, response: 0.3)
+    func animator(for animationType: AnimationType, in containerView: UIView) -> UIViewPropertyAnimator {
+        let timingParameters = UISpringTimingParameters(damping: 1, response: 0.3)
         let animator = UIViewPropertyAnimator(duration: 0, timingParameters: timingParameters)
         
+        switch animationType {
+        case .dismiss:
+            break
+        case .attemptToDismiss:
+            break
+        case .setDetent(let detent):
+            let contentSize = self.preferredContentSize(for: detent)
+            self._presentedViewHeight?.constant = contentSize.height
+        }
+
         // Add animations
         animator.addAnimations {
-            // Animation progress for dissmiss action.
-            var animationProgress: CGFloat = 0.0
-            if case .setDetent(.medium) = actionItemAtEnd {
-                // Animation progress for medium detent.
-                animationProgress = 0.5
-            } else if case .setDetent(.large) = actionItemAtEnd {
-                // Animation progress for large detent.
-                animationProgress = 1.0
-            } else if case .attemptToDismiss = actionItemAtEnd {
-                switch self.selectedDetent {
-                case .medium:
-                    animationProgress = 0.5
-                case .large:
-                    animationProgress = 1.0
-                case .none:
-                    break
-                }
-            }
-            let animation = self.animation(for: animationProgress, in: containerView)
-            self.apply(animation: animation)
+            self.presentedView?.parentDropShadowView?.layoutIfNeeded()
         }
         
         // Add completion
         animator.addCompletion { position in
-            if position == .end {
-                if case .setDetent(.medium) = actionItemAtEnd {
-                    self.selectedDetent = .medium
+            switch position {
+            case .start:
+                break
+            case .end:
+                if case let .setDetent(detent) = animationType {
+                    self.selectedDetent = detent
                     if let sheetPresentationDelegate = self.delegate as? ModalSheetPresentationControllerDelegate {
                         sheetPresentationDelegate.sheetPresentationControllerDidChangeSelectedDetent?(self)
                     }
-                } else if case .setDetent(.large) = actionItemAtEnd {
-                    self.selectedDetent = .large
-                    if let sheetPresentationDelegate = self.delegate as? ModalSheetPresentationControllerDelegate {
-                        sheetPresentationDelegate.sheetPresentationControllerDidChangeSelectedDetent?(self)
-                    }
-                } else if case .attemptToDismiss = actionItemAtEnd {
-                    // Do nothing
-                } else if case .dismiss = actionItemAtEnd {
+                }
+
+                if case .dismiss = animationType {
                     self.presentedViewController.dismiss(animated: true) {
                         self.delegate?.presentationControllerDidDismiss?(self)
                     }
                 }
+            case .current:
+                break
+            @unknown default:
+                break
             }
         }
         

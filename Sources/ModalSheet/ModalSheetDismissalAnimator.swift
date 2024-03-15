@@ -4,7 +4,7 @@ public class ModalSheetDismissalAnimator: NSObject, UIViewControllerAnimatedTran
     public let animator: UIViewPropertyAnimator
 
     override public init() {
-        let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.3)
+        let springTimingParameters = UISpringTimingParameters(damping: 0.9, response: 0.5)
         self.animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: springTimingParameters)
         super.init()
     }

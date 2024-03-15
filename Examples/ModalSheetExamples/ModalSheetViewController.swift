@@ -7,13 +7,33 @@ final class ModalSheetViewController: UIViewController {
     private var _detents: [Detent] = [.large]
     private var _selectedDetent: Detent? = nil
     private var _largestUndimmedDetent: Detent? = nil
+
+    var displaylink: CADisplayLink!
+
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+
+        displaylink = CADisplayLink(target: self, selector: #selector(linkTriggered))
+        //displaylink.add(to: .main, forMode: .default)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         configureView()
     }
-    
+
+    @objc func linkTriggered(displaylink: CADisplayLink) {
+        print("\(displaylink.timestamp)")
+
+        print("transform.isIdentity", view.transform.isIdentity)
+        print("transform3D.isIdentity", CATransform3DIsIdentity(view.transform3D))
+    }
+
     // MARK: - Setters
     
     func setPreferredCornerRadius(_ preferredCornerRadius: CGFloat?) {

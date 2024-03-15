@@ -17,7 +17,7 @@ final class ModalSheetExampleController: UITableViewController {
     @IBOutlet private weak var isModalInPresentationSwitch: UISwitch!
     @IBOutlet private weak var prefersGrabberVisibleSwitch: UISwitch!
     @IBOutlet private weak var preferredCornerRadiusLabel: UILabel!
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -83,6 +83,7 @@ final class ModalSheetExampleController: UITableViewController {
         if detentLargeSwitch.isOn {
             detents.append(.large)
         }
+
         modalSheetViewController.setDetents(detents)
         
         if selectedDetentMediumSwitch.isOn {
