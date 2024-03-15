@@ -1,37 +1,26 @@
 import UIKit
 
-public class ModalSheetTransition: NSObject, UIViewControllerTransitioningDelegate {
-    
+final class ModalSheetTransition: NSObject, UIViewControllerTransitioningDelegate {
+
     static let shared = ModalSheetTransition()
         
-    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        guard let presented = presented as? ModalSheetTransitioning else {
-            return nil
-        }
-        return ModalSheetPresentationAnimator(
-            detents: presented.detents,
-            selectedDetent: presented.selectedDetent,
-            largestUndimmedDetent: presented.largestUndimmedDetent)
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return ModalSheetPresentationAnimator()
     }
     
-    public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if dismissed is ModalSheetTransitioning {
-            return ModalSheetDismissalAnimator()
-        }
-        return nil
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return ModalSheetDismissalAnimator()
     }
     
-    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        guard let presented = presented as? ModalSheetTransitioning else {
-            return nil
-        }
+    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        let presentedModalSheet = presented as! ModalSheetTransitioning
         let presentationController = ModalSheetPresentationController(presentedViewController: presented, presenting: presenting)
-        presentationController.detents = presented.detents
-        presentationController.selectedDetent = presented.selectedDetent
-        presentationController.largestUndimmedDetent = presented.largestUndimmedDetent
-        presentationController.prefersGrabberVisible = presented.prefersGrabberVisible
-        presentationController.preferredCornerRadius = presented.preferredCornerRadius
-        presentationController.delegate = presented.delegate
+        presentationController.detents = presentedModalSheet.detents
+        presentationController.selectedDetent = presentedModalSheet.selectedDetent
+        presentationController.largestUndimmedDetent = presentedModalSheet.largestUndimmedDetent
+        presentationController.prefersGrabberVisible = presentedModalSheet.prefersGrabberVisible
+        presentationController.preferredCornerRadius = presentedModalSheet.preferredCornerRadius
+        presentationController.delegate = presentedModalSheet.delegate
         return presentationController
     }
 }

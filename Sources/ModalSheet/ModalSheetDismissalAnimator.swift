@@ -1,7 +1,7 @@
 import UIKit
 
-public class ModalSheetDismissalAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    public let animator: UIViewPropertyAnimator
+final class ModalSheetDismissalAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    private let animator: UIViewPropertyAnimator
 
     override public init() {
         let springTimingParameters = UISpringTimingParameters(damping: 0.9, response: 0.5)
@@ -9,11 +9,11 @@ public class ModalSheetDismissalAnimator: NSObject, UIViewControllerAnimatedTran
         super.init()
     }
 
-    public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return animator.duration
     }
 
-    public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let fromView = transitionContext.view(forKey: .from),
               let fromViewController = transitionContext.viewController(forKey: .from),
               let toViewController = transitionContext.viewController(forKey: .to),

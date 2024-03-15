@@ -1,15 +1,9 @@
 import UIKit
 
-public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    public let detents: [Detent]
-    public let selectedDetent: Detent?
-    public let largestUndimmedDetent: Detent?
-    public let animator: UIViewPropertyAnimator
-    
-    public init(detents: [Detent], selectedDetent: Detent?, largestUndimmedDetent: Detent?) {
-        self.detents = detents
-        self.selectedDetent = selectedDetent
-        self.largestUndimmedDetent = largestUndimmedDetent
+final class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    private let animator: UIViewPropertyAnimator
+
+    override init() {
         let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.4)
         self.animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: springTimingParameters)
         super.init()
@@ -27,6 +21,10 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
             transitionContext.completeTransition(false)
             return
         }
+
+        let detents = presentationController.detents
+        let selectedDetent = presentationController.selectedDetent
+        let largestUndimmedDetent = presentationController.largestUndimmedDetent
 
         let detent: Detent = {
             if let selectedDetent, detents.contains(selectedDetent) {
@@ -66,7 +64,7 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
         presentationController.dimmingView.alpha = 0.0
         dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)
 
-        animator.addAnimations { [largestUndimmedDetent] in
+        animator.addAnimations {
             if detent != largestUndimmedDetent {
                 presentationController.dimmingView.alpha = 1.0
             }
