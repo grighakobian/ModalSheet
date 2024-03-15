@@ -6,7 +6,7 @@ public enum Detent: Hashable {
     case medium
     /// The system's large detent.
     case large
-
+    /// A detent with a constant height.
     case constant(height: CGFloat)
 }
 
@@ -17,6 +17,7 @@ public enum Detent: Hashable {
 }
 
 public class ModalSheetPresentationController: UIPresentationController {
+
     /// An object that represent animation props.
     struct Animation {
         /// The dimming view alpha.
@@ -43,8 +44,6 @@ public class ModalSheetPresentationController: UIPresentationController {
     let touchForwardingView: TouchForwardingView
     let panGestureRecognizer: UIPanGestureRecognizer
     let tapGestureRecognizer: UITapGestureRecognizer
-
-    private var _presentedViewHeight: NSLayoutConstraint?
 
     /// The preferred corner radius of the sheet when presented.
     /// This value is only respected when the sheet is at the front of its stack.
@@ -101,17 +100,6 @@ public class ModalSheetPresentationController: UIPresentationController {
         
         addPanGestureRecognizer(to: containerView)
         addTapGestureRecognizer(to: containerView)
-    }
-
-    public override func presentationTransitionDidEnd(_ completed: Bool) {
-        super.presentationTransitionDidEnd(completed)
-
-        for constraint in presentedView?.parentDropShadowView?.constraints ?? [] {
-            if constraint.firstAttribute == .height && constraint.secondAttribute == .notAnAttribute {
-                _presentedViewHeight = constraint
-                break
-            }
-        }
     }
 
 //    func initialDetentForPresenting() -> Detent {
@@ -203,8 +191,7 @@ public class ModalSheetPresentationController: UIPresentationController {
     
     @objc private func panned(_ recognizer: UIPanGestureRecognizer) {
         guard let containerView = containerView,
-              let presentedView = presentedView?.parentDropShadowView,
-              let _presentedViewHeight else { return }
+              let presentedView = presentedView?.parentDropShadowView else { return }
 
         defer {
             recognizer.setTranslation(.zero, in: containerView)
@@ -212,16 +199,18 @@ public class ModalSheetPresentationController: UIPresentationController {
 
         switch recognizer.state {
         case .changed:
+            var presentedViewFrame = presentedView.frame
             let translation = recognizer.translation(in: containerView)
             let maxHeight = containerView.bounds.height - containerView.safeAreaInsets.top
-            let height = _presentedViewHeight.constant - translation.y
-            _presentedViewHeight.constant = min(height, maxHeight)
+            presentedViewFrame.origin.y = max(containerView.safeAreaInsets.top, presentedView.frame.minY + translation.y)
+            presentedViewFrame.size.height = min(presentedView.frame.height - translation.y, maxHeight)
+            presentedView.frame = presentedViewFrame
             presentedView.layoutIfNeeded()
             print("translation: \(translation)")
         case .ended, .cancelled:
             let velocity = recognizer.velocity(in: containerView)
             print("Velocity: \(velocity)")
-            let animationType = animationType(for: _presentedViewHeight.constant, velocity: velocity)
+            let animationType = animationType(for: presentedView.frame.height, velocity: velocity)
             print(animationType)
             let animator = animator(for: animationType, in: containerView)
             animator.startAnimation()
@@ -269,69 +258,25 @@ public class ModalSheetPresentationController: UIPresentationController {
         return .attemptToDismiss
     }
 
-    func presentedViewHeight(_ initialHeight: CGFloat, in containerView: UIView, with translation: CGPoint) -> CGFloat {
-        let maxHeight = containerView.bounds.height - containerView.safeAreaInsets.top
-        return min(initialHeight - translation.y, maxHeight)
-    }
-
-    /// Apply the animation.
-    /// - Parameter animation: An Animation object that represents animation props.
-    func apply(animation: Animation) {
-        dimmingView.alpha = animation.alpha
-        presentedView?.parentDropShadowView?.transform = animation.transform
-    }
-    
-    /// Get the animation progress based on pan gesture translation in container view.
-    /// - Parameters:
-    ///   - translation: The translation of the pan gesture recognizer in container view.
-    ///   - containerView: The presentation controller container view
-    /// - Returns: A CGFloat value representing the animation progress.
-    func animationProgress(for translation: CGAffineTransform, in containerView: UIView) -> CGFloat {
-        let currentOffset = translation.ty - containerView.safeAreaInsets.top
-        let containerHeight = containerView.bounds.height - containerView.safeAreaInsets.top
-        let progress = 1.0 - (currentOffset / containerHeight)
-        return progress
-    }
-    
-    /// Get the animation props based on animation progress and presented view top offset addition.
-    /// - Parameters:
-    ///   - progress: The animation progress.
-    ///   - topOffsetAddition: The presented view top offset addition.
-    /// - Returns: An Animation object that represents animation props.
-    func animation(for progress: CGFloat, in containerView: UIView, and topOffsetAddition: CGFloat = 10.0) -> Animation {
-        let contentHeight = containerView.frame.height
-        let safeAreaInsets = containerView.safeAreaInsets
-        let topOffset = safeAreaInsets.top + topOffsetAddition
-        let offset = ((contentHeight - topOffset) * (1 - progress)) + topOffset
-        let presentedViewTransform = CGAffineTransform(translationX: 0, y: offset)
-        
-        var dimmingViewAlpha = min(1.0, (progress / 0.5))
-        if largestUndimmedDetent == .medium {
-            dimmingViewAlpha = min(1.0, ((progress-0.5) / 0.5))
-        } else if largestUndimmedDetent == .large {
-            dimmingViewAlpha = 0.0
-        }
-       
-        return Animation(alpha: dimmingViewAlpha, transform: presentedViewTransform)
-    }
-    
     func animator(for animationType: AnimationType, in containerView: UIView) -> UIViewPropertyAnimator {
         let timingParameters = UISpringTimingParameters(damping: 1, response: 0.3)
         let animator = UIViewPropertyAnimator(duration: 0, timingParameters: timingParameters)
-        
-        switch animationType {
-        case .dismiss:
-            break
-        case .attemptToDismiss:
-            break
-        case .setDetent(let detent):
-            let contentSize = self.preferredContentSize(for: detent)
-            self._presentedViewHeight?.constant = contentSize.height
-        }
-
+        let presentedView = presentedView!.parentDropShadowView!
         // Add animations
         animator.addAnimations {
-            self.presentedView?.parentDropShadowView?.layoutIfNeeded()
+            switch animationType {
+            case .dismiss:
+                break
+            case .attemptToDismiss:
+                break
+            case .setDetent(let detent):
+                var presentedViewFrame = presentedView.frame
+                let contentSize = self.preferredContentSize(for: detent)
+                presentedViewFrame.origin.y = containerView.bounds.height - contentSize.height
+                presentedViewFrame.size.height = contentSize.height
+                presentedView.frame = presentedViewFrame
+                presentedView.layoutIfNeeded()
+            }
         }
         
         // Add completion
@@ -361,7 +306,52 @@ public class ModalSheetPresentationController: UIPresentationController {
         
         return animator
     }
-    
+}
+
+
+private extension ModalSheetPresentationController {
+
+    /// Apply the animation.
+    /// - Parameter animation: An Animation object that represents animation props.
+    func apply(animation: Animation) {
+        dimmingView.alpha = animation.alpha
+        presentedView?.parentDropShadowView?.transform = animation.transform
+    }
+
+    /// Get the animation progress based on pan gesture translation in container view.
+    /// - Parameters:
+    ///   - translation: The translation of the pan gesture recognizer in container view.
+    ///   - containerView: The presentation controller container view
+    /// - Returns: A CGFloat value representing the animation progress.
+    func animationProgress(for translation: CGAffineTransform, in containerView: UIView) -> CGFloat {
+        let currentOffset = translation.ty - containerView.safeAreaInsets.top
+        let containerHeight = containerView.bounds.height - containerView.safeAreaInsets.top
+        let progress = 1.0 - (currentOffset / containerHeight)
+        return progress
+    }
+
+    /// Get the animation props based on animation progress and presented view top offset addition.
+    /// - Parameters:
+    ///   - progress: The animation progress.
+    ///   - topOffsetAddition: The presented view top offset addition.
+    /// - Returns: An Animation object that represents animation props.
+    func animation(for progress: CGFloat, in containerView: UIView, and topOffsetAddition: CGFloat = 10.0) -> Animation {
+        let contentHeight = containerView.frame.height
+        let safeAreaInsets = containerView.safeAreaInsets
+        let topOffset = safeAreaInsets.top + topOffsetAddition
+        let offset = ((contentHeight - topOffset) * (1 - progress)) + topOffset
+        let presentedViewTransform = CGAffineTransform(translationX: 0, y: offset)
+
+        var dimmingViewAlpha = min(1.0, (progress / 0.5))
+        if largestUndimmedDetent == .medium {
+            dimmingViewAlpha = min(1.0, ((progress-0.5) / 0.5))
+        } else if largestUndimmedDetent == .large {
+            dimmingViewAlpha = 0.0
+        }
+
+        return Animation(alpha: dimmingViewAlpha, transform: presentedViewTransform)
+    }
+
     /// Decide the action item item when user interaction ended.
     /// - Parameters:
     ///   - progress: The animation progress.
@@ -371,11 +361,11 @@ public class ModalSheetPresentationController: UIPresentationController {
     func actionItemAtEnd(for progress: CGFloat, and velocity: CGPoint, in containerView: UIView) -> ActionItemAtEnd {
         let velocityChange = velocity.y
         let requiredMinVelocity = containerView.bounds.height / 2.0
-        
+
         if abs(velocityChange) < requiredMinVelocity {
             return .setDetent(selectedDetent ?? .medium)
         }
-        
+
         if progress > 0.5 {
              if velocityChange < -requiredMinVelocity {
                  if detents.contains(.large) {

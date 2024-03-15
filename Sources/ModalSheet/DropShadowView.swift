@@ -41,7 +41,6 @@ private final class DropShadowLayer: CALayer {
 }
 
 extension UIView {
-
     var parentDropShadowView: DropShadowView? {
         var parent = superview
         while let superview = parent {
@@ -49,15 +48,6 @@ extension UIView {
                 return dropShadowView
             }
             parent = superview.superview
-        }
-        return nil
-    }
-
-    var heightConstraint: NSLayoutConstraint? {
-        for constraint in constraints {
-            if constraint.firstAttribute == .height && constraint.secondAttribute == .notAnAttribute {
-                return constraint
-            }
         }
         return nil
     }

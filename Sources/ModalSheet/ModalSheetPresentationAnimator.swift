@@ -22,7 +22,7 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
     public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let fromViewController = transitionContext.viewController(forKey: .from),
               let toViewController = transitionContext.viewController(forKey: .to),
-              let presentationView = transitionContext.view(forKey: .to),
+              let presentingView = transitionContext.view(forKey: .to),
               let presentationController = toViewController.presentationController as? ModalSheetPresentationController else {
             transitionContext.completeTransition(false)
             return
@@ -37,36 +37,31 @@ public class ModalSheetPresentationAnimator: NSObject, UIViewControllerAnimatedT
                 return .large
             }
         }()
+
         let preferredContentSize = presentationController.preferredContentSize(for: detent)
+        let initialFrame = CGRect(origin: .zero, size: preferredContentSize)
 
         let containerView = transitionContext.containerView
+
+        presentingView.frame = initialFrame
+        presentingView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+
         let dropShadowView = DropShadowView()
+        dropShadowView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        var frame = initialFrame
+        frame.origin.y = containerView.bounds.height - initialFrame.height
+        dropShadowView.frame = frame
 
         let contentView = UIView()
+        contentView.frame = initialFrame
         contentView.clipsToBounds = true
+        contentView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         contentView.layer.cornerRadius = presentationController.preferredCornerRadius ?? 8.0
 
-        presentationView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(presentationView)
-        presentationView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-        presentationView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        presentationView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-        presentationView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(presentingView)
         dropShadowView.addSubview(contentView)
-        contentView.topAnchor.constraint(equalTo: dropShadowView.topAnchor).isActive = true
-        contentView.leadingAnchor.constraint(equalTo: dropShadowView.leadingAnchor).isActive = true
-        contentView.trailingAnchor.constraint(equalTo: dropShadowView.trailingAnchor).isActive = true
-        contentView.bottomAnchor.constraint(equalTo: dropShadowView.bottomAnchor).isActive = true
-
-        dropShadowView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(dropShadowView)
-        dropShadowView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
-        dropShadowView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
-        dropShadowView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-        dropShadowView.heightAnchor.constraint(equalToConstant: preferredContentSize.height).isActive = true
 
         presentationController.dimmingView.alpha = 0.0
         dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)

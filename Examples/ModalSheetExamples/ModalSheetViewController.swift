@@ -8,30 +8,10 @@ final class ModalSheetViewController: UIViewController {
     private var _selectedDetent: Detent? = nil
     private var _largestUndimmedDetent: Detent? = nil
 
-    var displaylink: CADisplayLink!
-
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-
-        displaylink = CADisplayLink(target: self, selector: #selector(linkTriggered))
-        //displaylink.add(to: .main, forMode: .default)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         configureView()
-    }
-
-    @objc func linkTriggered(displaylink: CADisplayLink) {
-        print("\(displaylink.timestamp)")
-
-        print("transform.isIdentity", view.transform.isIdentity)
-        print("transform3D.isIdentity", CATransform3DIsIdentity(view.transform3D))
     }
 
     // MARK: - Setters
@@ -71,6 +51,31 @@ private extension ModalSheetViewController {
         closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16.0).isActive = true
         
         closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+
+        let button = UIButton(type: .system)
+        button.backgroundColor = UIColor.systemBlue
+        button.tintColor = UIColor.white
+        button.layer.cornerRadius = 24
+        button.setTitle("Show Results", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(button)
+        button.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24).isActive = true
+        button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24).isActive = true
+        button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 48).isActive = true
+
+        let textView = UITextView()
+        textView.backgroundColor = .clear
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(textView)
+        textView.topAnchor.constraint(equalTo: view.topAnchor, constant: 48).isActive = true
+        textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24).isActive = true
+        textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24).isActive = true
+        textView.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24).isActive = true
     }
     
     @objc func close() {
