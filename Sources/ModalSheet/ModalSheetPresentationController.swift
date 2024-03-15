@@ -39,8 +39,8 @@ public enum Detent: Hashable {
         case setDetent(Detent)
     }
 
+    let grabber: UIView
     let dimmingView: UIView
-    let grabberView: UIView
     let touchForwardingView: TouchForwardingView
     let panGestureRecognizer: UIPanGestureRecognizer
     let tapGestureRecognizer: UITapGestureRecognizer
@@ -53,7 +53,7 @@ public enum Detent: Hashable {
     /// Set to YES to show a grabber at the top of the sheet.
     /// Default: NO
     public var prefersGrabberVisible: Bool = false {
-        didSet { grabberView.isHidden = !prefersGrabberVisible }
+        didSet { grabber.isHidden = !prefersGrabberVisible }
     }
 
     /// The array of detents that the sheet may rest at.
@@ -69,37 +69,63 @@ public enum Detent: Hashable {
     /// The identifier of the largest detent that is not dimmed. When nil or the identifier is not found in detents, all detents are dimmed.
     /// Default: nil
     public var largestUndimmedDetent: Detent?
-
-    public func setSelectedDetent(_ selectedDetent: Detent, animated: Bool) {
-        guard detents.contains(selectedDetent),
-              let containerView = containerView,
-              self.selectedDetent != selectedDetent else { return }
-        
-        let animator = animator(for: .setDetent(selectedDetent), in: containerView)
-        animator.startAnimation()
-    }
             
     override public init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
         self.dimmingView = UIView()
-        self.grabberView = UIView()
+        self.grabber = UIView()
         self.touchForwardingView = TouchForwardingView()
         self.panGestureRecognizer = UIPanGestureRecognizer()
         self.tapGestureRecognizer = UITapGestureRecognizer()
         super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
     }
-    
+
+    open override func containerViewDidLayoutSubviews() {
+        super.containerViewDidLayoutSubviews()
+
+        guard let containerView, let presentedView else { return }
+
+        let grabberSize = CGSize(width: 36, height: 5)
+        let grabberPosition = CGPoint(x: presentedView.frame.midX - grabberSize.width / 2, y: 5)
+        grabber.frame = CGRect(origin: grabberPosition, size: grabberSize)
+
+        dimmingView.frame = containerView.bounds
+        touchForwardingView.frame = containerView.bounds
+    }
+
     override public func presentationTransitionWillBegin() {
         super.presentationTransitionWillBegin()
-        guard let containerView, let presentedView else {
-            return
-        }
-        configureContainerView(containerView)
 
-        addDimmingView(to: containerView)
-        addGrabberView(to: presentedView)
-        
-        addPanGestureRecognizer(to: containerView)
-        addTapGestureRecognizer(to: containerView)
+        guard let containerView, let presentedView else { return }
+
+        // Add touch forwarding view
+        containerView.backgroundColor = .clear
+        touchForwardingView.passthroughViews = [presentingViewController.view]
+        touchForwardingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        containerView.insertSubview(touchForwardingView, at: 0)
+
+        // Add grabber
+        grabber.layer.cornerRadius = 2.5
+        grabber.clipsToBounds = true
+        grabber.backgroundColor = UIColor.grabberBackground
+        grabber.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleBottomMargin]
+        grabber.isHidden = !prefersGrabberVisible
+        presentedView.addSubview(grabber)
+
+        // Add dimming view
+        dimmingView.backgroundColor = UIColor.dimmBackground
+        dimmingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        dimmingView.isUserInteractionEnabled = (largestUndimmedDetent == .none)
+        containerView.addSubview(dimmingView)
+
+        // Add a pan gesture recognizer for interactive transition
+        panGestureRecognizer.addTarget(self, action: #selector(panned(_:)))
+        panGestureRecognizer.cancelsTouchesInView = false
+        containerView.addGestureRecognizer(panGestureRecognizer)
+
+        // Add a tap gesture recognizer for top to dismiss
+        tapGestureRecognizer.addTarget(self, action: #selector(tapped(_:)))
+        tapGestureRecognizer.cancelsTouchesInView = false
+        containerView.addGestureRecognizer(tapGestureRecognizer)
     }
 
 //    func initialDetentForPresenting() -> Detent {
@@ -130,54 +156,6 @@ public enum Detent: Hashable {
         case .constant(let height):
             return CGSize(width: containerView.bounds.width, height: height)
         }
-    }
-    
-    private func addGrabberView(to presentedView: UIView) {
-        grabberView.backgroundColor = UIColor.grabberBackground
-        grabberView.layer.cornerRadius = 2.5
-        grabberView.translatesAutoresizingMaskIntoConstraints = false
-        presentedView.addSubview(grabberView)
-        grabberView.topAnchor.constraint(equalTo: presentedView.topAnchor, constant: 5.0).isActive = true
-        grabberView.centerXAnchor.constraint(equalTo: presentedView.centerXAnchor).isActive = true
-        grabberView.widthAnchor.constraint(equalToConstant: 36.0).isActive = true
-        grabberView.heightAnchor.constraint(equalToConstant: 5.0).isActive = true
-        grabberView.isHidden = !prefersGrabberVisible
-    }
-    
-    private func addDimmingView(to containerView: UIView) {
-        dimmingView.backgroundColor = UIColor.dimmBackground
-        dimmingView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(dimmingView)
-        dimmingView.isUserInteractionEnabled = (largestUndimmedDetent == .none)
-        dimmingView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
-        dimmingView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
-        dimmingView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        dimmingView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-    }
-    
-    private func configureContainerView(_ containerView: UIView) {
-        containerView.backgroundColor = .clear
-        touchForwardingView.passthroughViews = [presentingViewController.view]
-        touchForwardingView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.insertSubview(touchForwardingView, at: 0)
-        touchForwardingView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
-        touchForwardingView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
-        touchForwardingView.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
-        touchForwardingView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
-    }
-    
-    private func addPanGestureRecognizer(to containerView: UIView) {
-        // Add a pan gesture recognizer for interactive transition
-        panGestureRecognizer.addTarget(self, action: #selector(panned(_:)))
-        panGestureRecognizer.cancelsTouchesInView = false
-        containerView.addGestureRecognizer(panGestureRecognizer)
-    }
-    
-    private func addTapGestureRecognizer(to containerView: UIView) {
-        // Add a tap gesture recognizer for top to dismiss
-        tapGestureRecognizer.addTarget(self, action: #selector(tapped(_:)))
-        tapGestureRecognizer.cancelsTouchesInView = false
-        containerView.addGestureRecognizer(tapGestureRecognizer)
     }
     
     @objc private func tapped(_ sender: UITapGestureRecognizer) {
@@ -305,108 +283,5 @@ public enum Detent: Hashable {
         }
         
         return animator
-    }
-}
-
-
-private extension ModalSheetPresentationController {
-
-    /// Apply the animation.
-    /// - Parameter animation: An Animation object that represents animation props.
-    func apply(animation: Animation) {
-        dimmingView.alpha = animation.alpha
-        presentedView?.parentDropShadowView?.transform = animation.transform
-    }
-
-    /// Get the animation progress based on pan gesture translation in container view.
-    /// - Parameters:
-    ///   - translation: The translation of the pan gesture recognizer in container view.
-    ///   - containerView: The presentation controller container view
-    /// - Returns: A CGFloat value representing the animation progress.
-    func animationProgress(for translation: CGAffineTransform, in containerView: UIView) -> CGFloat {
-        let currentOffset = translation.ty - containerView.safeAreaInsets.top
-        let containerHeight = containerView.bounds.height - containerView.safeAreaInsets.top
-        let progress = 1.0 - (currentOffset / containerHeight)
-        return progress
-    }
-
-    /// Get the animation props based on animation progress and presented view top offset addition.
-    /// - Parameters:
-    ///   - progress: The animation progress.
-    ///   - topOffsetAddition: The presented view top offset addition.
-    /// - Returns: An Animation object that represents animation props.
-    func animation(for progress: CGFloat, in containerView: UIView, and topOffsetAddition: CGFloat = 10.0) -> Animation {
-        let contentHeight = containerView.frame.height
-        let safeAreaInsets = containerView.safeAreaInsets
-        let topOffset = safeAreaInsets.top + topOffsetAddition
-        let offset = ((contentHeight - topOffset) * (1 - progress)) + topOffset
-        let presentedViewTransform = CGAffineTransform(translationX: 0, y: offset)
-
-        var dimmingViewAlpha = min(1.0, (progress / 0.5))
-        if largestUndimmedDetent == .medium {
-            dimmingViewAlpha = min(1.0, ((progress-0.5) / 0.5))
-        } else if largestUndimmedDetent == .large {
-            dimmingViewAlpha = 0.0
-        }
-
-        return Animation(alpha: dimmingViewAlpha, transform: presentedViewTransform)
-    }
-
-    /// Decide the action item item when user interaction ended.
-    /// - Parameters:
-    ///   - progress: The animation progress.
-    ///   - velocity: The pan gesture velocity in container view.
-    ///   - containerView: The presentation controller container view.
-    /// - Returns: An object that represent the action item when user interaction ended.
-    func actionItemAtEnd(for progress: CGFloat, and velocity: CGPoint, in containerView: UIView) -> ActionItemAtEnd {
-        let velocityChange = velocity.y
-        let requiredMinVelocity = containerView.bounds.height / 2.0
-
-        if abs(velocityChange) < requiredMinVelocity {
-            return .setDetent(selectedDetent ?? .medium)
-        }
-
-        if progress > 0.5 {
-             if velocityChange < -requiredMinVelocity {
-                 if detents.contains(.large) {
-                     return .setDetent(.large)
-                 } else if detents.contains(.medium) {
-                     return .setDetent(.medium)
-                 } else {
-                     if presentedViewController.isModalInPresentation {
-                         return .attemptToDismiss
-                     } else if delegate?.presentationControllerShouldDismiss?(self) == false {
-                         return .attemptToDismiss
-                     }
-                     return .dismiss
-                 }
-             } else {
-                 if detents.contains(.medium) {
-                     return .setDetent(.medium)
-                 } else {
-                     if presentedViewController.isModalInPresentation {
-                         return .attemptToDismiss
-                     } else if delegate?.presentationControllerShouldDismiss?(self) == false {
-                         return .attemptToDismiss
-                     }
-                     return .dismiss
-                 }
-             }
-        } else {
-            if velocityChange > requiredMinVelocity {
-                if presentedViewController.isModalInPresentation {
-                    return .attemptToDismiss
-                } else if delegate?.presentationControllerShouldDismiss?(self) == false {
-                    return .attemptToDismiss
-                }
-                return .dismiss
-            } else {
-                if detents.contains(.medium) {
-                    return .setDetent(.medium)
-                } else {
-                    return .setDetent(.large)
-                }
-            }
-        }
     }
 }
