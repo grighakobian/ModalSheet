@@ -22,24 +22,11 @@ import UIKit
             return
         }
 
-        let detents = presentationController.detents
-        let selectedDetent = presentationController.selectedDetent
-        let largestUndimmedDetent = presentationController.largestUndimmedDetent
-
-        let detent: Detent = {
-            if let selectedDetent, detents.contains(selectedDetent) {
-                return selectedDetent
-            } else if detents.contains(.medium) {
-                return .medium
-            } else {
-                return .large
-            }
-        }()
-
-        let preferredContentSize = presentationController.preferredContentSize(for: detent)
-        let initialFrame = CGRect(origin: .zero, size: preferredContentSize)
-
         let containerView = transitionContext.containerView
+
+        let detent = presentationController.presentingDetent()
+        let animation = presentationController.animation(for: detent)
+        let initialFrame = CGRect(origin: .zero, size: animation.presentedViewFrame.size)
 
         presentingView.frame = initialFrame
         presentingView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
@@ -55,16 +42,14 @@ import UIKit
         contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         contentView.layer.cornerRadius = presentationController.preferredCornerRadius ?? 8.0
 
-        contentView.addSubview(presentingView)
-        dropShadowView.addSubview(contentView)
         containerView.addSubview(dropShadowView)
+        dropShadowView.addSubview(contentView)
+        contentView.addSubview(presentingView)
         containerView.layoutSubviews()
 
         animator.addAnimations {
-            if detent != largestUndimmedDetent {
-                presentationController.dimmingView.alpha = 1.0
-            }
-            dropShadowView.frame = dropShadowView.frame.offsetBy(dx: 0, dy: -dropShadowView.frame.height)
+            dropShadowView.frame = animation.presentedViewFrame
+            presentationController.dimmingView.alpha = animation.dimmingViewAlpha
         }
         
         animator.addCompletion { position in

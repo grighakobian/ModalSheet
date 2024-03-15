@@ -21,9 +21,9 @@ public enum Detent: Hashable {
     /// An object that represent animation props.
     struct Animation {
         /// The dimming view alpha.
-        let alpha: CGFloat
-        /// The presented view transform.
-        let transform: CGAffineTransform
+        let dimmingViewAlpha: CGFloat
+        /// The presented view frame.
+        let presentedViewFrame: CGRect
     }
     
     /// An object that represent the action item when user interaction ended.
@@ -129,15 +129,45 @@ public enum Detent: Hashable {
         containerView.addGestureRecognizer(tapGestureRecognizer)
     }
 
-//    func initialDetentForPresenting() -> Detent {
-//        if let selectedDetent, detents.contains(selectedDetent) {
-//            return selectedDetent
-//        } else if detents.contains(.medium) {
-//            return .medium
-//        } else {
-//            return .large
-//        }
-//    }
+    open override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+        coordinator.animate(alongsideTransition: { [unowned self] coordinatorContext in
+            let animation = animation(for: presentingDetent())
+            self.containerView?.frame = coordinatorContext.containerView.bounds
+            self.presentedView?.parentDropShadowView?.frame = animation.presentedViewFrame
+        })
+    }
+
+    func sortDetentsByContentSize(_ detents: [Detent])-> [Detent] {
+        return detents.sorted { (lhsValue, rhsValue) -> Bool in
+            let detent1Height = preferredContentSize(for: lhsValue).height
+            let detent2Height = preferredContentSize(for: rhsValue).height
+            return detent1Height < detent2Height
+        }
+    }
+
+    func presentingDetent()-> Detent {
+        if let selectedDetent {
+            return selectedDetent
+        }
+        let sortedDetents = sortDetentsByContentSize(detents)
+        return sortedDetents.first ?? .large
+    }
+
+    func animation(for detent: Detent)-> Animation {
+        let containerBounds = containerView!.bounds
+        var presentedViewFrame = containerBounds
+        presentedViewFrame.size = preferredContentSize(for: detent)
+        presentedViewFrame.origin.y = containerBounds.height - presentedViewFrame.size.height
+        var dimmingViewAlpha: CGFloat = 1.0
+        if let largestUndimmedDetent = largestUndimmedDetent {
+            let targetDetentSize = preferredContentSize(for: detent)
+            let largestUndimmedDetentSize = preferredContentSize(for: largestUndimmedDetent)
+            if targetDetentSize.height < largestUndimmedDetentSize.height {
+                dimmingViewAlpha = 0.0
+            }
+        }
+        return Animation(dimmingViewAlpha: dimmingViewAlpha, presentedViewFrame: presentedViewFrame)
+    }
 
     func preferredContentSize(for detent: Detent) -> CGSize {
         guard let containerView = containerView else { return .zero }
@@ -167,7 +197,7 @@ public enum Detent: Hashable {
             }
         }
     }
-    
+
     @objc private func panned(_ recognizer: UIPanGestureRecognizer) {
         guard let containerView = containerView,
               let presentedView = presentedView?.parentDropShadowView else { return }
@@ -191,7 +221,7 @@ public enum Detent: Hashable {
             print("Velocity: \(velocity)")
             let animationType = animationType(for: presentedView.frame.height, velocity: velocity)
             print(animationType)
-            let animator = animator(for: animationType, in: containerView)
+            let animator = animator(for: animationType, in: containerView, velocity: velocity)
             animator.startAnimation()
         default:
             break
@@ -199,33 +229,32 @@ public enum Detent: Hashable {
     }
 
     func animationType(for presentedViewHeight: CGFloat, velocity: CGPoint)-> AnimationType {
-        let sortedDetents = detents.sorted { (detent1, detent2) -> Bool in
-            let detent1Height = preferredContentSize(for: detent1).height
-            let detent2Height = preferredContentSize(for: detent2).height
-            return detent1Height < detent2Height
-        }
+        let sortedDetents = sortDetentsByContentSize(detents)
 
-        let requiredMinVelocity = containerView!.bounds.height / 2.0
-
-        if abs(velocity.y) < requiredMinVelocity {
+        if abs(velocity.y) < 100 {
             print("Velocity is small")
-            return .setDetent(selectedDetent ?? sortedDetents.first ?? .large)
+            return .setDetent(presentingDetent())
         }
 
-        for (index, detent) in sortedDetents.enumerated() {
-            let detentHeight = preferredContentSize(for: detent).height
-            if velocity.y > 0 {
+        if velocity.y > 0 {
+            if velocity.y > 1000 {
+                return .setDetent(sortedDetents.first!)
+            }
+            for detent in sortedDetents.reversed() {
+                let detentHeight = preferredContentSize(for: detent).height
                 if detentHeight <= presentedViewHeight {
                     return .setDetent(detent)
-                } else if index == 0 {
-//                    if presentedViewController.isModalInPresentation {
-//                        return .attemptToDismiss
-//                    } else {
-                        return .dismiss
-//                    }
+                } else if detent == sortedDetents.first {
+                    return .dismiss
                 }
-            } else {
-                // moving up
+            }
+        } else {
+            if abs(velocity.y) > 1000 {
+                return .setDetent(sortedDetents.last!)
+            }
+            // moving up
+            for (index, detent) in sortedDetents.enumerated() {
+                let detentHeight = preferredContentSize(for: detent).height
                 if detentHeight >= presentedViewHeight {
                     return .setDetent(detent)
                 } else if index == sortedDetents.count - 1 {
@@ -237,23 +266,45 @@ public enum Detent: Hashable {
         return .attemptToDismiss
     }
 
-    func animator(for animationType: AnimationType, in containerView: UIView) -> UIViewPropertyAnimator {
-        let timingParameters = UISpringTimingParameters(damping: 1, response: 0.3)
-        let animator = UIViewPropertyAnimator(duration: 0, timingParameters: timingParameters)
+    func animator(for animationType: AnimationType, in containerView: UIView, velocity: CGPoint) -> UIViewPropertyAnimator {
         let presentedView = presentedView!.parentDropShadowView!
+
+        let detent: Detent = {
+            switch animationType {
+            case .dismiss:
+                return presentingDetent()
+            case .attemptToDismiss:
+                return presentingDetent()
+            case .setDetent(let detent):
+                return detent
+            }
+        }()
+
+        let preferredContentSize = self.preferredContentSize(for: detent)
+        let distance = abs(preferredContentSize.height - presentedView.frame.height)
+        let initialVelocity = -1.0 * velocity.y / distance
+
+        let timingParameters = UISpringTimingParameters(damping: 1, response: 0.3, initialVelocity: CGVector(dx: initialVelocity, dy: initialVelocity))
+        let animator = UIViewPropertyAnimator(duration: 0, timingParameters: timingParameters)
         // Add animations
         animator.addAnimations {
             switch animationType {
             case .dismiss:
-                break
-            case .attemptToDismiss:
-                break
-            case .setDetent(let detent):
                 var presentedViewFrame = presentedView.frame
-                let contentSize = self.preferredContentSize(for: detent)
-                presentedViewFrame.origin.y = containerView.bounds.height - contentSize.height
-                presentedViewFrame.size.height = contentSize.height
+                presentedViewFrame.origin.y = containerView.bounds.height
+                self.dimmingView.alpha = 0
                 presentedView.frame = presentedViewFrame
+                presentedView.layoutIfNeeded()
+            case .attemptToDismiss:
+                let detent = self.presentingDetent()
+                let animation = self.animation(for: detent)
+                self.dimmingView.alpha = animation.dimmingViewAlpha
+                presentedView.frame = animation.presentedViewFrame
+                presentedView.layoutIfNeeded()
+            case .setDetent(let detent):
+                let animation = self.animation(for: detent)
+                self.dimmingView.alpha = animation.dimmingViewAlpha
+                presentedView.frame = animation.presentedViewFrame
                 presentedView.layoutIfNeeded()
             }
         }

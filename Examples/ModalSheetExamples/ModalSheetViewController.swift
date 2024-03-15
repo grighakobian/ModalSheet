@@ -69,13 +69,13 @@ private extension ModalSheetViewController {
         textView.isEditable = false
         textView.isScrollEnabled = false
         textView.font = UIFont.preferredFont(forTextStyle: .body)
-        textView.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+//        textView.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         textView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(textView)
         textView.topAnchor.constraint(equalTo: view.topAnchor, constant: 48).isActive = true
         textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24).isActive = true
         textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24).isActive = true
-        textView.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24).isActive = true
+//        textView.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24).isActive = true
     }
     
     @objc func close() {

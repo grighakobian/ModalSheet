@@ -47,7 +47,7 @@ final class ModalSheetExampleController: UITableViewController {
 
                 if #available(iOS 16.0, *) {
                     let detent = UISheetPresentationController.Detent.custom(resolver: { context in
-                        return 150
+                        return 200
                     })
                     detents.append(detent)
                     sheetPresentationController.largestUndimmedDetentIdentifier = detent.identifier
@@ -93,7 +93,7 @@ final class ModalSheetExampleController: UITableViewController {
             detents.append(.large)
         }
 
-        let detent = Detent.constant(height: 150)
+        let detent = Detent.constant(height: 200)
         detents.append(detent)
         modalSheetViewController.setLargestUndimmedDetent(detent)
 
