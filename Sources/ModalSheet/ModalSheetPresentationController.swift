@@ -112,6 +112,7 @@ public enum Detent: Hashable {
         presentedView.addSubview(grabber)
 
         // Add dimming view
+        dimmingView.alpha = 0
         dimmingView.backgroundColor = UIColor.dimmBackground
         dimmingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         dimmingView.isUserInteractionEnabled = (largestUndimmedDetent == .none)

@@ -46,9 +46,7 @@ import UIKit
 
         let dropShadowView = DropShadowView()
         dropShadowView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-        var frame = initialFrame
-        frame.origin.y = containerView.bounds.height - initialFrame.height
-        dropShadowView.frame = frame
+        dropShadowView.frame = initialFrame.offsetBy(dx: 0, dy: containerView.bounds.height)
 
         let contentView = UIView()
         contentView.frame = initialFrame
@@ -60,15 +58,13 @@ import UIKit
         contentView.addSubview(presentingView)
         dropShadowView.addSubview(contentView)
         containerView.addSubview(dropShadowView)
-
-        presentationController.dimmingView.alpha = 0.0
-        dropShadowView.transform = CGAffineTransform(translationX: 0, y: containerView.bounds.height)
+        containerView.layoutSubviews()
 
         animator.addAnimations {
             if detent != largestUndimmedDetent {
                 presentationController.dimmingView.alpha = 1.0
             }
-            dropShadowView.transform = CGAffineTransform.identity
+            dropShadowView.frame = dropShadowView.frame.offsetBy(dx: 0, dy: -dropShadowView.frame.height)
         }
         
         animator.addCompletion { position in

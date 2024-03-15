@@ -44,6 +44,15 @@ final class ModalSheetExampleController: UITableViewController {
                 if detentLargeSwitch.isOn {
                     detents.append(.large())
                 }
+
+                if #available(iOS 16.0, *) {
+                    let detent = UISheetPresentationController.Detent.custom(resolver: { context in
+                        return 150
+                    })
+                    detents.append(detent)
+                    sheetPresentationController.largestUndimmedDetentIdentifier = detent.identifier
+                }
+
                 sheetPresentationController.detents = detents
                 
                 if selectedDetentMediumSwitch.isOn {
@@ -59,7 +68,7 @@ final class ModalSheetExampleController: UITableViewController {
                 } else if largestUndimmedDetentLargeSwitch.isOn {
                     sheetPresentationController.largestUndimmedDetentIdentifier = .large
                 } else {
-                    sheetPresentationController.largestUndimmedDetentIdentifier = nil
+                    //sheetPresentationController.largestUndimmedDetentIdentifier = nil
                 }
             }
             present(modalSheetViewController, animated: true)
@@ -84,6 +93,10 @@ final class ModalSheetExampleController: UITableViewController {
             detents.append(.large)
         }
 
+        let detent = Detent.constant(height: 150)
+        detents.append(detent)
+        modalSheetViewController.setLargestUndimmedDetent(detent)
+
         modalSheetViewController.setDetents(detents)
         
         if selectedDetentMediumSwitch.isOn {
@@ -99,7 +112,7 @@ final class ModalSheetExampleController: UITableViewController {
         } else if largestUndimmedDetentLargeSwitch.isOn {
             modalSheetViewController.setLargestUndimmedDetent(.large)
         } else {
-            modalSheetViewController.setLargestUndimmedDetent(nil)
+            //modalSheetViewController.setLargestUndimmedDetent(nil)
         }
     }
     
