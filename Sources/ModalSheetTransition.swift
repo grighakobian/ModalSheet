@@ -20,7 +20,7 @@ import UIKit
         presentationController.largestUndimmedDetent = presentedModalSheet.largestUndimmedDetent
         presentationController.prefersGrabberVisible = presentedModalSheet.prefersGrabberVisible
         presentationController.preferredCornerRadius = presentedModalSheet.preferredCornerRadius
-        presentationController.delegate = presentedModalSheet.delegate
+        presentationController.delegate = presentedModalSheet.modalSheetDelegate
         return presentationController
     }
 }
