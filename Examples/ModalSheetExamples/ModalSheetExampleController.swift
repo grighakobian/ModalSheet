@@ -50,7 +50,7 @@ final class ModalSheetExampleController: UITableViewController {
                         return 200
                     })
                     detents.append(detent)
-                    sheetPresentationController.largestUndimmedDetentIdentifier = detent.identifier
+//                    sheetPresentationController.largestUndimmedDetentIdentifier = detent.identifier
                 }
 
                 sheetPresentationController.detents = detents

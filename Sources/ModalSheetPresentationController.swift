@@ -99,8 +99,9 @@ public enum Detent: Hashable {
 
         // Add touch forwarding view
         containerView.backgroundColor = .clear
-        touchForwardingView.passthroughViews = [presentingViewController.view]
+//        touchForwardingView.passthroughViews = [presentingViewController.view]
         touchForwardingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        touchForwardingView.isUserInteractionEnabled = false
         containerView.insertSubview(touchForwardingView, at: 0)
 
         // Add grabber
@@ -190,11 +191,9 @@ public enum Detent: Hashable {
     }
     
     @objc private func tapped(_ sender: UITapGestureRecognizer) {
-        if largestUndimmedDetent == nil && selectedDetent == .medium {
-            let location = sender.location(in: containerView)
-            if presentedView?.frame.contains(location) == false {
-                presentedViewController.dismiss(animated: true)
-            }
+        let location = sender.location(in: containerView)
+        if presentedView?.frame.contains(location) == false {
+            presentedViewController.dismiss(animated: true)
         }
     }
 
