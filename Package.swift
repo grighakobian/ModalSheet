@@ -14,7 +14,9 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ModalSheet"),
+            name: "ModalSheet",
+            path: "Sources"
+        ),
         .testTarget(
             name: "ModalSheetTests",
             dependencies: ["ModalSheet"]),
