@@ -15,10 +15,10 @@ let package = Package(
     targets: [
         .target(
             name: "ModalSheet",
-            path: "Sources"
-        ),
+            path: "Sources"),
         .testTarget(
             name: "ModalSheetTests",
-            dependencies: ["ModalSheet"]),
+            dependencies: ["ModalSheet"],
+            path: "Tests")
     ]
 )
