@@ -1,7 +1,6 @@
 import UIKit
 
-@MainActor public extension UIViewController {
-
+public extension UIViewController {
     func presentModalSheet(_ viewControllerToPresent: ModalSheetTransitioning, animated: Bool, completion: (()->Void)? = nil) {
         viewControllerToPresent.modalPresentationStyle = .custom
         viewControllerToPresent.transitioningDelegate = ModalSheetTransition.shared

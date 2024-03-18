@@ -2,7 +2,7 @@ import UIKit
 
 @MainActor public protocol ModalSheetTransitioning: UIViewController {
     /// The delegate object for managing adaptive presentations.
-    var delegate: ModalSheetPresentationControllerDelegate? { get }
+    var modalSheetDelegate: ModalSheetPresentationControllerDelegate? { get }
 
     /// The preferred corner radius of the sheet when presented.
     /// This value is only respected when the sheet is at the front of its stack.
@@ -31,9 +31,9 @@ import UIKit
 
 // MARK: - ModalSheetTransitioning defaults
 
-extension ModalSheetTransitioning {
+public extension ModalSheetTransitioning {
     
-    var delegate: ModalSheetPresentationControllerDelegate? {
+    var modalSheetDelegate: ModalSheetPresentationControllerDelegate? {
         return nil
     }
     
