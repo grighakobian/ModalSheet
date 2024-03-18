@@ -5,6 +5,9 @@ final class TouchForwardingView: UIView {
     var passthroughViews = [UIView]()
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard isUserInteractionEnabled else {
+            return nil
+        }
         let hitView = super.hitTest(point, with: event)
         if hitView != self {
             return hitView
