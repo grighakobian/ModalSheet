@@ -99,7 +99,7 @@ public enum Detent: Hashable {
 
         // Add touch forwarding view
         containerView.backgroundColor = .clear
-//        touchForwardingView.passthroughViews = [presentingViewController.view]
+        touchForwardingView.passthroughViews = [presentingViewController.view]
         touchForwardingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         touchForwardingView.isUserInteractionEnabled = false
         containerView.insertSubview(touchForwardingView, at: 0)
