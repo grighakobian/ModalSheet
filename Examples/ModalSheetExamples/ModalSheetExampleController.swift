@@ -26,7 +26,12 @@ final class ModalSheetExampleController: UITableViewController {
     
     @IBAction private func presentModal(_ sender: UIButton) {
         modalSheetViewController.isModalInPresentation = isModalInPresentationSwitch.isOn
-        presentModalSheet(modalSheetViewController, animated: true)
+        presentModalSheet(modalSheetViewController,
+                          transitionOptions: ModalSheetTransitionOptions(
+                            detents: [.medium, .large]),
+                          delegate: nil,
+                          animated: true,
+                          completion: nil)
     }
     
     @IBAction private func presentiOS15Modal(_ sender: UIButton) {

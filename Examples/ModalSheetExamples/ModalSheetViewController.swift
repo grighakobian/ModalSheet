@@ -86,52 +86,52 @@ private extension ModalSheetViewController {
 
 // MARK: - ModalSheetTransitioning
 
-extension ModalSheetViewController: ModalSheetTransitioning {
-    
-    var delegate: ModalSheetPresentationControllerDelegate? {
-        return self
-    }
-    
-    var preferredCornerRadius: CGFloat? {
-        return _preferredCornerRadius
-    }
-
-    var prefersGrabberVisible: Bool {
-        return _prefersGrabberVisible
-    }
-
-    var detents: [Detent] {
-        return _detents
-    }
-    
-    var selectedDetent: Detent? {
-        return _selectedDetent
-    }
-
-    var largestUndimmedDetent: Detent? {
-        return _largestUndimmedDetent
-    }
-}
+//extension ModalSheetViewController: ModalSheetTransitioning {
+//    
+//    var delegate: ModalSheetPresentationControllerDelegate? {
+//        return self
+//    }
+//    
+//    var preferredCornerRadius: CGFloat? {
+//        return _preferredCornerRadius
+//    }
+//
+//    var prefersGrabberVisible: Bool {
+//        return _prefersGrabberVisible
+//    }
+//
+//    var detents: [Detent] {
+//        return _detents
+//    }
+//    
+//    var selectedDetent: Detent? {
+//        return _selectedDetent
+//    }
+//
+//    var largestUndimmedDetent: Detent? {
+//        return _largestUndimmedDetent
+//    }
+//}
 
 // MARK: - ModalSheetPresentationControllerDelegate
 
-extension ModalSheetViewController: ModalSheetPresentationControllerDelegate {
-    
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        print(#function)
-    }
-    
-    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        print(#function)
-    }
-    
-    func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
-        print(#function)
-    }
-    
-    func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
-        let shouldDismiss = true
-        print(#function, shouldDismiss)
-        return shouldDismiss
-    }
-}
+//extension ModalSheetViewController: ModalSheetPresentationControllerDelegate {
+//    
+//    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+//        print(#function)
+//    }
+//    
+//    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
+//        print(#function)
+//    }
+//    
+//    func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
+//        print(#function)
+//    }
+//    
+//    func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+//        let shouldDismiss = true
+//        print(#function, shouldDismiss)
+//        return shouldDismiss
+//    }
+//}

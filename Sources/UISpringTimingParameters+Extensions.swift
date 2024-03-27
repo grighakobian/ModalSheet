@@ -12,4 +12,19 @@ extension UISpringTimingParameters {
         let damp = 4 * .pi * damping / response
         self.init(mass: 1, stiffness: stiffness, damping: damp, initialVelocity: initialVelocity)
     }
+
+    convenience init(duration: TimeInterval, bounce: CGFloat, initialVelocity: CGVector = .zero) {
+        let mass = 1
+        let stiffness = pow(2 * CGFloat.pi / CGFloat(duration), 2)
+        let damping: CGFloat = {
+            if bounce >= 0 {
+                return 1 - ((4 * CGFloat.pi * bounce) / CGFloat(duration))
+            } else {
+                return (4 * CGFloat.pi) / (CGFloat(duration) + 4 * CGFloat.pi * bounce)
+            }
+        }()
+        print("stiffness: \(stiffness)")
+        print("damping: \(damping)")
+        self.init(mass: 1, stiffness: stiffness, damping: damping, initialVelocity: initialVelocity)
+    }
 }

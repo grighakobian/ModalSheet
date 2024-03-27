@@ -4,7 +4,8 @@ import UIKit
     private let animator: UIViewPropertyAnimator
 
     override init() {
-        let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.4)
+//        let springTimingParameters = UISpringTimingParameters(damping: 1.0, response: 0.4)
+        let springTimingParameters = UISpringTimingParameters(duration: 0.5, bounce: 1)
         self.animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: springTimingParameters)
         super.init()
     }

@@ -5,7 +5,8 @@ import UIKit
     private let onCompleted: (()-> Void)
 
     init(onCompleted: @escaping (()-> Void)) {
-        let springTimingParameters = UISpringTimingParameters(damping: 0.9, response: 0.5)
+//        let springTimingParameters = UISpringTimingParameters(damping: 0.9, response: 0.5)
+        let springTimingParameters = UISpringTimingParameters(duration: 0.5, bounce: 1)
         self.animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: springTimingParameters)
         self.onCompleted = onCompleted
         super.init()
@@ -32,7 +33,7 @@ import UIKit
             fromView.parentDropShadowView?.transform = transform
             presentationController.dimmingView.alpha = 0
         }
-
+        
         animator.addCompletion { [weak self] position in
             switch position {
             case .start:
@@ -40,7 +41,9 @@ import UIKit
             case .current:
                 break
             case .end:
-                self?.onCompleted()
+                defer {
+                    self?.onCompleted()
+                }
                 fromView.removeFromSuperview()
                 toViewController.endAppearanceTransition()
                 let didComplete = !transitionContext.transitionWasCancelled
